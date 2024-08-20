@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Styled PowerPoint Slides</title>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/libs/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        textarea, input, select {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .options-group {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Create Styled PowerPoint Slides</h1>
+    
+    <label for="tamil-text">Tamil Text:</label>
+    <br>
+    <textarea id="tamil-text" rows="10" cols="50" placeholder="Enter Tamil paragraphs, separated by paragraphs"></textarea>
+    <br><br>
+    
+    <label for="english-text">English Text:</label>
+    <br>
+    <textarea id="english-text" rows="10" cols="50" placeholder="Enter English translations, separated by paragraphs"></textarea>
+    <br><br>
+    
+    <div class="options-group">
+        <h3>Slide Options:</h3>
+        <label for="background-color">Background Color:</label>
+        <input type="color" id="background-color" value="#000000">
+        
+        <label for="tamil-color">Tamil Text Color:</label>
+        <input type="color" id="tamil-color" value="#FFFFFF">
+        
+        <label for="english-color">English Text Color:</label>
+        <input type="color" id="english-color" value="#FFFFFF">
+        
+        <label for="tamil-font-size">Tamil Font Size:</label>
+        <input type="number" id="tamil-font-size" value="26" min="12" max="72">
+        
+        <label for="english-font-size">English Font Size:</label>
+        <input type="number" id="english-font-size" value="24" min="12" max="72">
+        
+        <label for="text-align">Text Alignment:</label>
+        <select id="text-align">
+            <option value="left">Left</option>
+            <option value="center" selected>Center</option>
+            <option value="right">Right</option>
+        </select>
+        
+        <label for="font-family">Font Family:</label>
+        <select id="font-family">
+            <option value="Arial" selected>Arial</option>
+            <option value="Calibri">Calibri</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Verdana">Verdana</option>
+        </select>
+    </div>
+    
+    <label for="output-name">Output File Name:</label>
+    <input type="text" id="output-name" placeholder="Enter output file name">
+    <br><br>
+    
+    <button id="create-slides">Create Styled PowerPoint Slides</button>
+    <button id="download-slides" style="display: none;">Download PowerPoint</button>
+
+    <script>
+    let pptx; // Global variable to store the presentation
+
+    document.getElementById('create-slides').addEventListener('click', function () {
+        // Get the Tamil and English text and output file name from user input
+        let tamilText = document.getElementById('tamil-text').value;
+        let englishText = document.getElementById('english-text').value;
+        let outputFileName = document.getElementById('output-name').value || "StyledSlides.pptx";
+
+        // Get style options
+        let backgroundColor = document.getElementById('background-color').value;
+        let tamilColor = document.getElementById('tamil-color').value;
+        let englishColor = document.getElementById('english-color').value;
+        let tamilFontSize = parseInt(document.getElementById('tamil-font-size').value);
+        let englishFontSize = parseInt(document.getElementById('english-font-size').value);
+        let textAlign = document.getElementById('text-align').value;
+        let fontFamily = document.getElementById('font-family').value;
+
+        // Split the Tamil and English text into paragraphs based on blank lines
+        let tamilParagraphs = tamilText.split(/\n\s*\n/);
+        let englishParagraphs = englishText.split(/\n\s*\n/);
+
+        // Check if both texts have the same number of paragraphs
+        if (tamilParagraphs.length !== englishParagraphs.length) {
+            alert("The number of Tamil and English paragraphs must be the same.");
+            return;
+        }
+
+        // 1. Create a new Presentation
+        let pres = new PptxGenJS();
+
+        // Set a default theme for all slides
+        pres.layout = 'LAYOUT_WIDE';
+        pres.theme = {
+            background: { color: backgroundColor.substring(1) }, // Remove # from color code
+            title: { color: "FFFFFF", fontSize: 44, fontFace: fontFamily },
+            body: { color: "F0F8FF", fontSize: 20, fontFace: fontFamily }
+        };
+
+        // 2. Add a Slide for each pair of paragraphs
+        tamilParagraphs.forEach((tamilPara, index) => {
+            let englishPara = englishParagraphs[index];
+
+            let slide = pres.addSlide();
+            slide.background = { fill: backgroundColor.substring(1) };
+
+            // Tamil text
+            slide.addText(tamilPara, {
+                x: '10%',
+                y: '20%',
+                w: '80%',
+                h: '30%',
+                align: textAlign,
+                fontSize: tamilFontSize,
+                color: tamilColor.substring(1),
+                fontFace: fontFamily
+            });
+
+            // English text
+            slide.addText(englishPara, {
+                x: '10%',
+                y: '55%',
+                w: '80%',
+                h: '30%',
+                align: textAlign,
+                fontSize: englishFontSize,
+                color: englishColor.substring(1),
+                fontFace: fontFamily
+            });
+        });
+
+        // Store the presentation in the global variable
+        pptx = pres;
+
+        // Show the download button
+        document.getElementById('download-slides').style.display = 'inline-block';
+
+        alert("Slides created successfully. Click 'Download PowerPoint' to save the file.");
+    });
+
+    document.getElementById('download-slides').addEventListener('click', function () {
+        if (pptx) {
+            let outputFileName = document.getElementById('output-name').value || "StyledSlides.pptx";
+            pptx.writeFile({ fileName: outputFileName });
+        } else {
+            alert("Please create the slides first.");
+        }
+    });
+    </script>
+</body>
+</html>
