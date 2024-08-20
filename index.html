@@ -103,10 +103,6 @@
         let englishParagraphs = englishText.split(/\n\s*\n/);
 
         // Check if both texts have the same number of paragraphs
-        if (tamilParagraphs.length !== englishParagraphs.length) {
-            alert("The number of Tamil and English paragraphs must be the same.");
-            return;
-        }
 
         // 1. Create a new Presentation
         let pres = new PptxGenJS();
