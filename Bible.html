@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible Scripture Search</title>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/libs/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 1rem;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .scripture-container {
+            max-width: 800px;
+            margin: 2rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        select, button {
+            margin: 1rem;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #357ab7;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bible Scripture Search</h1>
+    </header>
+    <div class="scripture-container">
+        <h2 id="scripture-title">Search for a Scripture</h2>
+        <div>
+            <select id="book-selector">
+                <option value="">Select Book</option>
+                <option value="John">John</option>
+                <option value="Psalm">Psalm</option>
+                <option value="Proverbs">Proverbs</option>
+            </select>
+            <select id="chapter-selector">
+                <option value="">Select Chapter</option>
+            </select>
+            <select id="verse-selector">
+                <option value="">Select Verse</option>
+            </select>
+            <button onclick="searchScripture()">Search</button>
+            <button onclick="startPresentation()">Start Presentation</button>
+        </div>
+        <p id="scripture-text">Your selected scripture will appear here.</p>
+    </div>
+
+    <script>
+        const scriptures = {
+            "John": {
+                "3": {
+                    "16": "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life."
+                }
+            },
+            "Psalm": {
+                "23": {
+                    "1-2": "The Lord is my shepherd, I lack nothing. He makes me lie down in green pastures, he leads me beside quiet waters."
+                }
+            },
+            "Proverbs": {
+                "3": {
+                    "5-6": "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight."
+                }
+            }
+        };
+
+        const bookSelector = document.getElementById('book-selector');
+        const chapterSelector = document.getElementById('chapter-selector');
+        const verseSelector = document.getElementById('verse-selector');
+
+        bookSelector.addEventListener('change', () => {
+            const selectedBook = bookSelector.value;
+            chapterSelector.innerHTML = '<option value="">Select Chapter</option>';
+            verseSelector.innerHTML = '<option value="">Select Verse</option>';
+
+            if (selectedBook && scriptures[selectedBook]) {
+                Object.keys(scriptures[selectedBook]).forEach(chapter => {
+                    const option = document.createElement('option');
+                    option.value = chapter;
+                    option.textContent = chapter;
+                    chapterSelector.appendChild(option);
+                });
+            }
+        });
+
+        chapterSelector.addEventListener('change', () => {
+            const selectedBook = bookSelector.value;
+            const selectedChapter = chapterSelector.value;
+            verseSelector.innerHTML = '<option value="">Select Verse</option>';
+
+            if (selectedBook && selectedChapter && scriptures[selectedBook][selectedChapter]) {
+                Object.keys(scriptures[selectedBook][selectedChapter]).forEach(verse => {
+                    const option = document.createElement('option');
+                    option.value = verse;
+                    option.textContent = verse;
+                    verseSelector.appendChild(option);
+                });
+            }
+        });
+
+        function searchScripture() {
+            const selectedBook = bookSelector.value;
+            const selectedChapter = chapterSelector.value;
+            const selectedVerse = verseSelector.value;
+
+            const title = document.getElementById('scripture-title');
+            const text = document.getElementById('scripture-text');
+
+            if (selectedBook && selectedChapter && selectedVerse && scriptures[selectedBook][selectedChapter][selectedVerse]) {
+                title.textContent = `${selectedBook} ${selectedChapter}:${selectedVerse}`;
+                text.textContent = scriptures[selectedBook][selectedChapter][selectedVerse];
+            } else {
+                title.textContent = "Scripture Not Found";
+                text.textContent = "Please make a valid selection and try again.";
+            }
+        }
+
+        function startPresentation() {
+        const title = document.getElementById('scripture-title').textContent;
+        const text = document.getElementById('scripture-text').textContent;
+
+        if (title && text && title !== "Scripture Not Found") {
+            // Create PowerPoint presentation
+            let pptx = new PptxGenJS();
+            let slide = pptx.addSlide();
+
+            // Add title and text to the slide
+            slide.addText(title, {
+                x: 0.5,
+                y: 1,
+                w: '90%',
+                h: 1,
+                fontSize: 24,
+                color: 'FFFFFF',
+                align: 'center'
+            });
+
+            slide.addText(text, {
+                x: 0.5,
+                y: 2,
+                w: '90%',
+                h: '80%',
+                fontSize: 18,
+                color: 'FFFFFF',
+                align: 'center'
+            });
+
+            // Generate the PowerPoint and provide download
+            pptx.writeFile({ fileName: 'Bible_Scripture_Presentation.pptx' });
+
+            // Open presentation in full screen (in-browser)
+            let presentationDiv = document.createElement('div');
+            presentationDiv.style.position = 'fixed';
+            presentationDiv.style.top = '0';
+            presentationDiv.style.left = '0';
+            presentationDiv.style.width = '100vw';
+            presentationDiv.style.height = '100vh';
+            presentationDiv.style.backgroundColor = 'black';
+            presentationDiv.style.display = 'flex';
+            presentationDiv.style.justifyContent = 'center';
+            presentationDiv.style.alignItems = 'center';
+            presentationDiv.style.color = 'white';
+            presentationDiv.style.zIndex = '1000';
+            presentationDiv.style.textAlign = 'center';
+            presentationDiv.style.fontFamily = 'Arial';
+
+            document.body.appendChild(presentationDiv);
+
+            let currentSlide = 0;
+
+            function renderSlide() {
+                presentationDiv.innerHTML = `
+                    <div style="width: 80%; height: 70%;">
+                        <h1 style="font-size: 2rem; margin-bottom: 20px;">${title}</h1>
+                        <p style="font-size: 1.5rem; color: white; line-height: 1.8;">${text}</p>
+                    </div>
+                    <button id="close-presentation" style="position: absolute; top: 10px; right: 10px; background-color: red; color: white;">Close</button>
+                `;
+
+                document.getElementById('close-presentation').addEventListener('click', function () {
+                    document.body.removeChild(presentationDiv);
+                });
+            }
+
+            renderSlide();
+        } else {
+            alert('Please search and select a valid scripture before starting the presentation.');
+        }
+    }
+</script>
+</body>
+</html>
