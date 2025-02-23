@@ -1,219 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Styled PowerPoint Slides</title>
-        <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/libs/jszip.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
-        <style>
-            /* Navbar styling */
-            .navbar {
-                display: flex;
-                justify-content: right;
-                align-items: center;
-                background-color: #333;
-                padding: 10px 20px;
-            }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Styled PowerPoint Slides</title>
+    <style>
+        /* Navbar styling */
+        .navbar {
+            display: flex;
+            justify-content: right;
+            align-items: center;
+            background-color: #333;
+            padding: 10px 20px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #555;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .navbar a:hover {
+            background-color: #777;
+        }
+        /* Existing styles */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        textarea, input, select {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .options-group {
+            margin-bottom: 20px;
+        }
+        #output {
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="/index.html" style="margin-right: 10px;">PowerPoint</a>
+        <a href="/Propresenter.html">Propresenter</a>
+    </div>
+    <!-- Main Content -->
+    <h1>Create Styled PowerPoint Slides</h1>
 
-            .navbar a {
-                color: white;
-                text-decoration: none;
-                padding: 10px 20px;
-                background-color: #555;
-                border-radius: 5px;
-                transition: background-color 0.3s ease;
-            }
-
-            .navbar a:hover {
-                background-color: #777;
-            }
-
-            /* Existing styles */
-            body {
-                font-family: Arial, sans-serif;
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 20px;
-            }
-            textarea, input, select {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-            button {
-                padding: 10px;
-                margin-right: 10px;
-                cursor: pointer;
-            }
-            .options-group {
-                margin-bottom: 20px;
-            }
-        </style>
-    </head>
+    <label for="tamil-text">Tamil Text:</label>
+    <textarea id="tamil-text" rows="10" cols="50" placeholder="Enter Tamil sentences, one per line"></textarea>
     
-    <body>
-        <!-- Navbar -->
-        <div class="navbar">
-            <a href="/index.html" style="margin-right: 10px;">PowerPoint</a>
-            <a href="/Propresenter.html">Propresenter</a>
-        </div>
-
-        <!-- Main Content -->
-        <h1>Create Styled PowerPoint Slides</h1>
+    <label for="english-text">English Text:</label>
+    <textarea id="english-text" rows="10" cols="50" placeholder="Enter English sentences, one per line"></textarea>
     
-        <label for="tamil-text">Tamil Text:</label>
-        <textarea id="tamil-text" rows="10" cols="50" placeholder="Enter Tamil paragraphs, separated by paragraphs"></textarea>
-        
-        <label for="english-text">English Text:</label>
-        <textarea id="english-text" rows="10" cols="50" placeholder="Enter English translations, separated by paragraphs"></textarea>
-        
-        <div class="options-group">
-            <h3>Slide Options:</h3>
-            <label for="background-color">Background Color:</label>
-            <input type="color" id="background-color" value="#000000">
-            
-            <label for="tamil-color">Tamil Text Color:</label>
-            <input type="color" id="tamil-color" value="#FFFFFF">
-            
-            <label for="english-color">English Text Color:</label>
-            <input type="color" id="english-color" value="#FFFFFF">
-            
-            <label for="tamil-font-size">Tamil Font Size:</label>
-            <input type="number" id="tamil-font-size" value="26" min="12" max="72">
-            
-            <label for="english-font-size">English Font Size:</label>
-            <input type="number" id="english-font-size" value="24" min="12" max="72">
-            
-            <label for="text-align">Text Alignment:</label>
-            <select id="text-align">
-                <option value="left">Left</option>
-                <option value="center" selected>Center</option>
-                <option value="right">Right</option>
-            </select>
-            
-            <label for="font-family">Font Family:</label>
-            <select id="font-family">
-                <option value="Arial" selected>Arial</option>
-                <option value="Calibri">Calibri</option>
-                <option value="Times New Roman">Times New Roman</option>
-                <option value="Verdana">Verdana</option>
-            </select>
-        </div>
-        
-        <label for="output-name">Output File Name:</label>
-        <input type="text" id="output-name" placeholder="Enter output file name">
-        <br><br>
-        
-        <button id="create-slides">Create Styled PowerPoint Slides</button>
-        <button id="download-slides" style="display: none;">Download PowerPoint</button>
-        <button id="present-slides" style="display: none;">Present Slides</button>
+    <button id="download-txt">Download Combined Text File</button>
+
     <script>
-    let pptx;
-    document.getElementById('create-slides').addEventListener('click', function () {
-        let tamilText = document.getElementById('tamil-text').value;
-        let englishText = document.getElementById('english-text').value;
-        let backgroundColor = document.getElementById('background-color').value;
-        let tamilColor = document.getElementById('tamil-color').value;
-        let englishColor = document.getElementById('english-color').value;
-        let tamilFontSize = parseInt(document.getElementById('tamil-font-size').value);
-        let englishFontSize = parseInt(document.getElementById('english-font-size').value);
-        let textAlign = document.getElementById('text-align').value;
-        let fontFamily = document.getElementById('font-family').value;
-        let tamilParagraphs = tamilText.split(/\n\s*\n/);
-        let englishParagraphs = englishText.split(/\n\s*\n/);
-        let pres = new PptxGenJS();
-        tamilParagraphs.forEach((tamilPara, index) => {
-            let englishPara = englishParagraphs[index] || '';
-            let slide = pres.addSlide();
-            slide.background = { fill: backgroundColor.substring(1) };
-            slide.addText(tamilPara, {
-                x: '10%',
-                y: '20%',
-                w: '80%',
-                h: '30%',
-                align: textAlign,
-                fontSize: tamilFontSize,
-                color: tamilColor.substring(1),
-                fontFace: fontFamily
-            });
-            slide.addText(englishPara, {
-                x: '10%',
-                y: '55%',
-                w: '80%',
-                h: '30%',
-                align: textAlign,
-                fontSize: englishFontSize,
-                color: englishColor.substring(1),
-                fontFace: fontFamily
-            });
+        document.getElementById('download-txt').addEventListener('click', function () {
+            // Get Tamil and English text from textareas
+            const tamilText = document.getElementById('tamil-text').value.trim();
+            const englishText = document.getElementById('english-text').value.trim();
+
+            // Split the text into lines
+            const tamilLines = tamilText.split('\n');
+            const englishLines = englishText.split('\n');
+
+            // Function to group every 2 lines into a paragraph
+            function groupLinesIntoParagraphs(lines) {
+                const paragraphs = [];
+                for (let i = 0; i < lines.length; i += 2) {
+                    const firstLine = lines[i] || ''; // Handle missing lines
+                    const secondLine = lines[i + 1] || '';
+                    paragraphs.push(`${firstLine}\n${secondLine}`.trim());
+                }
+                return paragraphs;
+            }
+
+            // Group Tamil and English lines into paragraphs
+            const tamilParagraphs = groupLinesIntoParagraphs(tamilLines);
+            const englishParagraphs = groupLinesIntoParagraphs(englishLines);
+
+            // Combine Tamil and English paragraphs into alternating format
+            let combinedOutput = '';
+            const maxLength = Math.max(tamilParagraphs.length, englishParagraphs.length);
+            for (let i = 0; i < maxLength; i++) {
+                if (i < tamilParagraphs.length) {
+                    combinedOutput += `${tamilParagraphs[i]}\n`;
+                }
+                if (i < englishParagraphs.length) {
+                    combinedOutput += `${englishParagraphs[i]}\n`;
+                }
+                combinedOutput += '\n'; // Add a blank line between paragraphs
+            }
+
+            // Create a downloadable .txt file
+            const blob = new Blob([combinedOutput], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'combined_text.txt';
+            a.click();
+            URL.revokeObjectURL(url); // Clean up the URL object
         });
-        pptx = pres;
-        document.getElementById('download-slides').style.display = 'inline-block';
-        document.getElementById('present-slides').style.display = 'inline-block';
-        alert("Slides created successfully. Click 'Download PowerPoint' to save the file or 'Present Slides' to view them in the browser.");
-    });
-    document.getElementById('download-slides').addEventListener('click', function () {
-        if (pptx) {
-            let outputFileName = document.getElementById('output-name').value || "StyledSlides.pptx";
-            pptx.writeFile({ fileName: outputFileName });
-        } else {
-            alert("Please create the slides first.");
-        }
-    });
-    document.getElementById('present-slides').addEventListener('click', function () {
-        let tamilParagraphs = document.getElementById('tamil-text').value.split(/\n\s*\n/);
-        let englishParagraphs = document.getElementById('english-text').value.split(/\n\s*\n/);
-        let backgroundColor = document.getElementById('background-color').value;
-        let tamilColor = document.getElementById('tamil-color').value;
-        let englishColor = document.getElementById('english-color').value;
-        let tamilFontSize = parseInt(document.getElementById('tamil-font-size').value);
-        let englishFontSize = parseInt(document.getElementById('english-font-size').value);
-        let textAlign = document.getElementById('text-align').value;
-        let fontFamily = document.getElementById('font-family').value;
-        let presentationDiv = document.createElement('div');
-        presentationDiv.style.position = 'fixed';
-        presentationDiv.style.top = '0';
-        presentationDiv.style.left = '0';
-        presentationDiv.style.width = '100vw';
-        presentationDiv.style.height = '100vh';
-        presentationDiv.style.backgroundColor = backgroundColor;
-        presentationDiv.style.display = 'flex';
-        presentationDiv.style.justifyContent = 'center';
-        presentationDiv.style.alignItems = 'center';
-        presentationDiv.style.color = tamilColor;
-        presentationDiv.style.fontFamily = fontFamily;
-        presentationDiv.style.zIndex = '1000';
-        presentationDiv.style.textAlign = textAlign;
-        document.body.appendChild(presentationDiv);
-        let currentSlide = 0;
-        function renderSlide(index) {
-            presentationDiv.innerHTML = `
-                <div style="text-align: ${textAlign}; width: 80%; height: 70%;">
-                    <p style="font-size: ${tamilFontSize}px; color: ${tamilColor}; margin-bottom: 20px;">${tamilParagraphs[index] || ''}</p>
-                    <p style="font-size: ${englishFontSize}px; color: ${englishColor};">${englishParagraphs[index] || ''}</p>
-                </div>
-                <button id="prev-slide" style="position: absolute; left: 10px;">Previous</button>
-                <button id="next-slide" style="position: absolute; right: 10px;">Next</button>
-                <button id="close-presentation" style="position: absolute; top: 10px; right: 10px;">Close</button>
-            `;
-            document.getElementById('prev-slide').addEventListener('click', function () {
-                if (currentSlide > 0) {
-                    currentSlide--;
-                    renderSlide(currentSlide);
-                }
-            });
-            document.getElementById('next-slide').addEventListener('click', function () {
-                if (currentSlide < tamilParagraphs.length - 1) {
-                    currentSlide++;
-                    renderSlide(currentSlide);
-                }
-            });
-            document.getElementById('close-presentation').addEventListener('click', function () {
-                document.body.removeChild(presentationDiv);
-            });
-        }
-        renderSlide(currentSlide);
-    });
     </script>
 </body>
 </html>
