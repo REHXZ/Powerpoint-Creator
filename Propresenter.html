@@ -96,10 +96,10 @@
             const maxLength = Math.max(tamilParagraphs.length, englishParagraphs.length);
             for (let i = 0; i < maxLength; i++) {
                 if (i < tamilParagraphs.length) {
-                    combinedOutput += `${tamilParagraphs[i]}\n`;
+                    combinedOutput += `Tamil:\n${tamilParagraphs[i]}\n`;
                 }
                 if (i < englishParagraphs.length) {
-                    combinedOutput += `${englishParagraphs[i]}\n`;
+                    combinedOutput += `English:\n${englishParagraphs[i]}\n`;
                 }
                 combinedOutput += '\n'; // Add a blank line between paragraphs
             }

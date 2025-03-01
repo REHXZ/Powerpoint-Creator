@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyrics Extractor</title>
+    <style>
+        /* Existing styles */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        textarea, input, select {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .options-group {
+            margin-bottom: 20px;
+        }
+        #output {
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lyrics Extractor</h1>
+
+    <label for="url">Enter URL:</label>
+    <input type="text" id="url" placeholder="Enter the URL of the lyrics page">
+
+    <button id="extract-and-download">Extract and Download Lyrics</button>
+
+    <script>
+        document.getElementById('extract-and-download').addEventListener('click', async function () {
+            const url = document.getElementById('url').value.trim();
+            
+            if (!url) {
+                alert("Please enter a valid URL.");
+                return;
+            }
+
+            try {
+                // Use a public CORS proxy to fetch the content of the webpage
+                const proxyUrl = 'https://api.allorigins.win/get?url=';
+                const response = await fetch(proxyUrl + encodeURIComponent(url));
+                const data = await response.json();
+                const html = data.contents;
+
+                // Parse the HTML using DOMParser
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // Extract Tamil and Tamil Roman (English) text
+                const tamilTextDiv = doc.querySelector('#tamiltext');
+                const romanTamilTextDiv = doc.querySelector('#roman_tamiltext');
+
+                if (!tamilTextDiv || !romanTamilTextDiv) {
+                    alert("Could not find the required elements on the page.");
+                    return;
+                }
+
+                // Helper function to process paragraphs based on \n
+                function processParagraphs(paragraphs) {
+                    const processedParagraphs = [];
+                    paragraphs.forEach(p => {
+                        const text = p.textContent.trim();
+                        const lines = text.split('\n'); // Split by newline characters
+
+                        if (lines.length > 3) {
+                            // First 3 lines stay in the original paragraph
+                            processedParagraphs.push(lines.slice(0, 3).join('\n'));
+                            // Remaining lines go into a new paragraph
+                            processedParagraphs.push(lines.slice(3).join('\n'));
+                        } else {
+                            processedParagraphs.push(text);
+                        }
+                    });
+                    return processedParagraphs;
+                }
+
+                // Extract all <p> tags from Tamil and English sections
+                const tamilParagraphsRaw = Array.from(tamilTextDiv.querySelectorAll('p'));
+                const englishParagraphsRaw = Array.from(romanTamilTextDiv.querySelectorAll('p'));
+
+                // Process Tamil and English paragraphs
+                const tamilParagraphs = processParagraphs(tamilParagraphsRaw);
+                const englishParagraphs = processParagraphs(englishParagraphsRaw);
+                
+                console.log(tamilParagraphs);
+                // Combine Tamil and English paragraphs
+                let combinedOutput = '';
+                const maxLength = Math.max(tamilParagraphs.length, englishParagraphs.length);
+
+                for (let i = 0; i < maxLength; i++) {
+                    const tamilPara = tamilParagraphs[i] || '';
+                    const englishPara = englishParagraphs[i] || '';
+
+                    // Combine Tamil and English paragraphs with a blank line separator
+                    const combinedPara = `${tamilPara}\n${englishPara}`.trim();
+                    combinedOutput += `${combinedPara}\n\n`; // Paragraph separator
+                }
+
+                // Create a downloadable .txt file
+                const blob = new Blob([combinedOutput.trim()], { type: 'text/plain' });
+                const urlBlob = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = urlBlob;
+                a.download = 'lyrics.txt';
+                a.click();
+                URL.revokeObjectURL(urlBlob);
+
+            } catch (error) {
+                console.error("Error fetching or parsing the page:", error);
+                alert("An error occurred while processing the page.");
+            }
+        });
+    </script>
+</body>
+</html>
